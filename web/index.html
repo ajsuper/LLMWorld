@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LLMWorld</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="bar">
+    <h1>LLMWorld</h1>
+    <div class="clock" title="Time of day">
+      <span id="clock-text">Connecting…</span>
+      <span class="dial"><span id="dial-fill"></span><span id="dial-night"></span></span>
+    </div>
+    <div class="controls">
+      <button id="btn-pause" title="Pause or resume (space)">Pause</button>
+      <button id="btn-step" title="Advance one tick">Step</button>
+      <label>Tick
+        <select id="speed" title="Real seconds per tick">
+          <option value="0.25">0.25s</option>
+          <option value="0.5">0.5s</option>
+          <option value="1">1s</option>
+          <option value="2" selected>2s</option>
+          <option value="3">3s</option>
+          <option value="5">5s</option>
+        </select>
+      </label>
+    </div>
+    <div class="brain" id="brain" title=""></div>
+  </header>
+
+  <main class="stage">
+    <section class="map" id="map-wrap">
+      <canvas id="map"></canvas>
+      <div class="hover" id="hover"></div>
+      <div class="map-hint">Drag to pan, scroll to zoom, click someone to inspect them. F follows, Esc lets go.</div>
+    </section>
+
+    <aside class="panel" id="panel">
+      <div class="roster" id="roster"></div>
+      <nav class="tabs" role="tablist">
+        <button role="tab" id="tab-mind" aria-selected="true">Mind</button>
+        <button role="tab" id="tab-power" aria-selected="false">Power</button>
+        <button role="tab" id="tab-island" aria-selected="false">Island</button>
+      </nav>
+      <div class="scroll" id="mind">
+        <p class="empty">Pick a castaway above or on the map to see what they're thinking.</p>
+      </div>
+      <div class="scroll" id="power" hidden>
+        <div class="edge-toggles" id="edge-toggles"></div>
+        <canvas id="power-graph" width="380" height="440"></canvas>
+        <p class="graph-note">Higher up means more of the others respect or fear them. Arrows point from a person to someone they obey, fear, like or can't stand.</p>
+        <ol class="ranking" id="ranking"></ol>
+      </div>
+      <div class="scroll" id="island" hidden></div>
+    </aside>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>

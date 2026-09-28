@@ -1,0 +1,36 @@
+world:
+  size: 96
+  seed: 7
+  tick_seconds: 2.0      # real time per simulation step
+  day_length: 600        # ticks per day (20 minutes at 2s/tick)
+  night_fraction: 0.35
+
+sim:
+  heartbeat_ticks: 8     # an agent with nothing happening still re-thinks this often
+  needs:                 # ticks for a need to go from 0 to critical
+    thirst_ticks: 450      # about 3/4 of a day
+    hunger_ticks: 650      # about a day
+    fatigue_ticks: 800
+
+monsters:
+  base: 2                # monsters on the first night
+  per_day: 1             # extra monsters each following night
+  max: 7
+
+llm:
+  backend: ollama        # ollama | openai (llama-server, vLLM, LM Studio...) | scripted
+  url: http://localhost:11434
+  models:
+    main: qwen3:8b       # agents with an ambition
+    fast: qwen3:4b       # everyone else
+  parallel: 4            # concurrent requests; match the server's parallel slots
+  temperature: 0.8
+  max_tokens: 400
+  context: 4096
+  timeout: 90
+  disable_thinking: true
+  api_key: ""
+
+server:
+  host: 127.0.0.1
+  port: 8765

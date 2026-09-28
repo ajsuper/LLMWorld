@@ -1,0 +1,13 @@
+[project]
+name = "llmworld"
+version = "0.1.0"
+description = "A text-based island sandbox where LLM agents survive, feud and build hierarchies."
+requires-python = ">=3.11"
+dependencies = ["aiohttp>=3.10", "pyyaml>=6"]
+
+[project.scripts]
+llmworld = "llmworld.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

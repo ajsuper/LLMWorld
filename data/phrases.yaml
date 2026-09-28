@@ -1,0 +1,87 @@
+# Inner-voice templates. Numbers never reach the prompt - only these.
+# Emotions: three intensity levels. with_source uses the stored cause ({source} {reason}).
+
+emotions:
+  joy:
+    levels: [0.35, 0.6, 0.85]
+    with_source:
+      - "{source} {reason}. That felt good."
+      - "{source} {reason}, and you can't stop smiling about it."
+      - "{source} {reason}. Right now it feels like everything might turn out fine."
+    generic:
+      - You feel alright. Things could be worse.
+      - You're in good spirits.
+      - You feel wonderful - almost like you belong here.
+  sadness:
+    levels: [0.3, 0.55, 0.8]
+    with_source:
+      - "{source} {reason}. It weighs on you."
+      - "{source} {reason}. There's a heaviness in your chest you can't shake."
+      - "{source} {reason}. Nothing seems worth doing anymore."
+    generic:
+      - You feel a little low.
+      - You feel hollow, and tired of all of this.
+      - Everything feels hopeless. You miss home so much it hurts.
+  anger:
+    levels: [0.3, 0.55, 0.8]
+    with_source:
+      - "{source} {reason}. It bothers you more than you'd like to admit."
+      - "{source} {reason}. You're angry, and {source} should know it."
+      - "{source} {reason}. Your fists are clenched. You want {source} to pay for it."
+    generic:
+      - Everything is getting on your nerves.
+      - You're angry and looking for someone to blame.
+      - You're furious. Someone is going to get hurt.
+  fear:
+    levels: [0.3, 0.55, 0.8]
+    with_source:
+      - "{source} {reason}. You're uneasy."
+      - "{source} {reason}. Your heart is pounding and you keep looking over your shoulder."
+      - "{source} {reason}. You're terrified. You need to get somewhere safe, now."
+    generic:
+      - Something about this island makes you uneasy.
+      - You're scared. Every sound makes you flinch.
+      - You're terrified and can barely think straight.
+
+needs:
+  thirst:
+    levels: [0.4, 0.6, 0.8, 0.9]
+    text:
+      - "Your mouth is getting dry. {hint}"
+      - "You're very thirsty and your head is starting to ache. Drink soon. {hint}"
+      - "You're desperate for water. You feel dizzy and slow - if you don't drink soon, you'll die. {hint}"
+      - "You are dying of thirst. Your body is shutting down. Nothing else matters - get water NOW. {hint}"
+  hunger:
+    levels: [0.4, 0.6, 0.8, 0.9]
+    text:
+      - "Your stomach is growling. You should find something to eat. {hint}"
+      - "You're really hungry, weak and finding it hard to focus. Eat soon. {hint}"
+      - "You're starving. Your hands are shaking and your legs are slow - if you don't eat soon, you'll die. {hint}"
+      - "You are starving to death. Your body is shutting down. Nothing else matters - get food NOW. {hint}"
+  fatigue:
+    levels: [0.6, 0.8, 0.95]
+    text:
+      - You're getting tired.
+      - You're exhausted. Your legs feel heavy.
+      - You can barely keep your eyes open. You need to sleep.
+  health:
+    levels: [0.7, 0.45, 0.2]
+    text:
+      - You're hurt - cuts and bruises.
+      - You're badly hurt. Every step hurts.
+      - You're dying. You need rest, food and water, and to stay away from danger.
+
+night:
+  alone: It's dark, and you're alone. Things move in the dark on this island.
+  lit: The firelight keeps the dark back. You feel a little safer here.
+  shelter: The walls of the shelter around you keep the night out.
+  dusk: The light is fading. Night will come soon, and with it the things from the caves.
+
+relation:
+  stranger: you don't really know {name} yet
+  fear_high: "{name} frightens you"
+  affinity_high: you're fond of {name}
+  affinity_low: you can't stand {name}
+  trust_low: you don't trust {name}
+  trust_high: you trust {name}
+  respect_high: you look up to {name}
