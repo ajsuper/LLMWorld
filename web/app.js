@@ -75,7 +75,15 @@ function onTick(m) {
   for (const [x, y, ch] of m.tiles) { S.grid[y][x] = ch; drawTile(x, y); }
   for (const [id, n] of m.bushes) { const b = S.bushes.get(id); if (b) b.n = n; }
   if (m.structures) S.structures = m.structures;
-  if (m.feed.length) { S.feed.push(...m.feed); S.feed = S.feed.slice(-300); renderIsland(); }
+  if (m.feed.length) {
+    for (const f of m.feed) {
+      // A request's line is resent as answers arrive: update it in place.
+      const i = f.id ? S.feed.findIndex((x) => x.id === f.id) : -1;
+      if (i >= 0) S.feed[i] = f; else S.feed.push(f);
+    }
+    S.feed = S.feed.slice(-300);
+    renderIsland();
+  }
   updateBar(m);
   updateRoster();
 }
