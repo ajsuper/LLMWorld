@@ -44,6 +44,9 @@ class Simulation:
         self.events: list[Event] = []
         self.feed: deque = deque(maxlen=300)
         self.tick_feed: list[dict] = []
+        # One feed line per request, rewritten as answers come in: rid -> {item, head, to, answers, tick}
+        self.request_lines: dict[int, dict] = {}
+        self._rids = 0
         self.pending: list[tuple[str, dict, dict]] = []  # (agent id, decision, meta) from the brain
         self._mods: dict[str, dict] = {}
         self._spawned_tonight = 0
@@ -275,6 +278,10 @@ class Simulation:
         for ev in events:
             if ev.public:
                 item = {"t": self.tick, "k": ev.kind, "text": ev.text, "x": ev.x, "y": ev.y, "actor": ev.actor}
+                if ev.kind == "request":
+                    item["id"] = f"req{ev.data['rid']}"
+                    self.request_lines[ev.data["rid"]] = {"item": item, "head": ev.text, "to": ev.data["to_ids"],
+                                                          "answers": {}, "tick": self.tick}
                 self.feed.append(item)
                 self.tick_feed.append(item)
             if self._log:
@@ -480,18 +487,20 @@ class Simulation:
                     any(p["to"] == a.id and p["task"].lower() == task.lower() for p in to.promises):
                 continue  # already asked, or already promised: don't nag
             to.pending_requests = [p for p in to.pending_requests if p["from"] != a.id]
-            to.pending_requests.append({"from": a.id, "task": task, "tick": self.tick, "action": action, "repeat": repeat})
+            to.pending_requests.append({"from": a.id, "task": task, "tick": self.tick, "action": action, "repeat": repeat,
+                                        "rid": self._rids + 1})
             a.rel(to.id).asked += 1
             asked.append(to)
         if far:
             self.notify(a, f"{_names(far)} {'is' if len(far) == 1 else 'are'} too far away to hear your request.", P_HEARTBEAT)
         if not asked:
             return
+        self._rids += 1
         names = _names([o.name for o in asked])
         a.said.append({"t": self.tick, "to": names, "text": f"(asking) {task}", "volume": "normal"})
         a.log(self.tick, "say", f'(asks {names}) "{task}"')
         self.emit(Event(self.tick, "request", a.x, a.y, actor=a.id, target=asked[0].id if len(asked) == 1 else None,
-                        data={"task": task, "to_ids": [o.id for o in asked], "repeat": repeat},
+                        data={"task": task, "to_ids": [o.id for o in asked], "repeat": repeat, "rid": self._rids},
                         radius=REQUEST_REACH, sound=True, text=f'{a.name} asked {names}: "{task}"'))
 
     def _answer(self, a: Agent, rr: dict) -> dict | None:
@@ -513,13 +522,14 @@ class Simulation:
         else:
             r.refused += 1
         a.log(self.tick, "act", f"{'accepted' if accept else 'refused'} {asker.name}'s request")
+        self._request_answered(req.get("rid"), a, "accepted" if accept else "declined")
         obey = dict(req["action"], _for=asker.id) if accept and req.get("action") else None
         if obey and req.get("repeat"):
             a.duty = {"action": dict(obey, _repeat=True), "for": asker.id, "task": req["task"], "since": self.tick}
             a.duty_wait = 0
             a.log(self.tick, "note", f"now works for {asker.name}: {req['task']}")
         self.emit(Event(self.tick, "request_answer", a.x, a.y, actor=a.id, target=asker.id,
-                        data={"accept": accept, "task": req["task"]}, radius=7.0, sound=True,
+                        data={"accept": accept, "task": req["task"]}, radius=7.0, sound=True, public=False,
                         text=f"{a.name} {'agreed to' if accept else 'refused'} {asker.name}'s request"))
         return obey
 
@@ -653,6 +663,24 @@ class Simulation:
         a.task = t
         a.recent.append(f"(job for {boss.name}) {t.label}")
         a.log(self.tick, "act", f"back to work for {boss.name}: {t.label}")
+
+    def _request_answered(self, rid: int | None, a: Agent, how: str) -> None:
+        """Fold an answer into the request's feed line: 'Bob asked ...: "..." - Ada accepted, Leo declined'."""
+        line = self.request_lines.get(rid)
+        if not line:
+            return
+        line["answers"][a.id] = how
+        by: dict[str, list[str]] = {}
+        for aid, h in line["answers"].items():
+            by.setdefault(h, []).append(self.agents[aid].name)
+        order = ("accepted", "declined", "didn't answer")
+        parts = [f"{_names(by[h])} {h}" for h in order if h in by]
+        line["item"]["text"] = f"{line['head']} - {', '.join(parts)}"
+        self.tick_feed.append(line["item"])  # same id: the viewer replaces the old line
+        if len(line["answers"]) >= len(line["to"]):
+            del self.request_lines[rid]
+        for k in [k for k, v in self.request_lines.items() if self.tick - v["tick"] > 200]:
+            del self.request_lines[k]  # someone died before answering
 
     def _note(self, a: Agent, note: dict) -> None:
         op = note.get("op", "none")
@@ -807,6 +835,7 @@ class Simulation:
             if self.tick - p["tick"] > 90:
                 a.pending_requests.remove(p)
                 asker = self.agents.get(p["from"])
+                self._request_answered(p.get("rid"), a, "didn't answer")
                 if asker:
                     asker.rel(a.id).refused += 1
                     asker.rel(a.id).last_answer = "ignored"
