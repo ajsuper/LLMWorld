@@ -22,7 +22,7 @@ llm:
   url: http://localhost:11434
   models:
     main: qwen3:8b       # agents with an ambition
-    fast: qwen3:4b       # everyone else
+    fast: qwen3:8b       # everyone else — same as main: an 8GB card can't hold two models loaded at once
   parallel: 4            # concurrent requests; match the server's parallel slots
   temperature: 0.8
   max_tokens: 400
